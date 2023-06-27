@@ -4,6 +4,7 @@ import {
   SafeAreaView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from "react-native";
 import React from "react";
@@ -11,16 +12,36 @@ import { StatusBar } from "expo-status-bar";
 import InputForm from "../components/InputForm";
 import TodoItem from "../components/TodoItem";
 import { useSelector } from "react-redux";
+import { getAuth, signOut } from "firebase/auth";
 
-const MainScreens = () => {
+const MainScreens = ({ navigation }) => {
   const todos = useSelector((state) => state.todos.todos);
   const todoTasks = todos.filter((item) => item.state === "todo");
   const completeTasks = todos.filter((item) => item.state === "done");
+  const auth = getAuth();
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      navigation.replace("login");
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar style="default" />
-
-      <Text style={styles.pageTitle}>Todo Apps</Text>
+      <View style={styles.pageTitleContainer}>
+        <Text style={styles.pageTitle}>Todo Apps</Text>
+        <TouchableOpacity
+          style={styles.logoutBtn}
+          onPress={() => {
+            handleLogout();
+          }}
+        >
+          <Text style={styles.logoutBtnText}>-</Text>
+        </TouchableOpacity>
+      </View>
       <View style={styles.listView}>
         <Text style={styles.listTitle}>할일</Text>
         {todoTasks.length !== 0 ? (
@@ -82,4 +103,20 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   emptyListText: { flex: 1, textAlign: "center", fontSize: 20, marginTop: 40 },
+  logoutBtn: {
+    marginBottom: 25,
+    marginRight: 20,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "black",
+    width: 42,
+    height: 42,
+    borderRadius: 4,
+  },
+  logoutBtnText: { color: "white", fontSize: 15 },
+  pageTitleContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
 });
